@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const token = 'MzY3OTQ1NjAwNjMwNzg0MDA5.DMCzyA.6AsA59J24ac_X2XuJLqkgO3wgQY';
-const prefix = '>'
+const settings = require('./settings.json');
 
 var request = require('request');
 
@@ -19,7 +18,7 @@ client.on('message', message => {
   // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
   // command = say
   // args = ["Is", "this", "the", "real", "life?"]
-  const args = message.content.slice(prefix.length).trim().split(/ +/g);
+  const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
 
 
@@ -160,4 +159,4 @@ client.on('message', message => {
   }
 });
 
-client.login(token);
+client.login(settings.token);
