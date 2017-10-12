@@ -10,40 +10,9 @@ function randomIntFromInterval(min,max)
    return Math.floor(Math.random()*(max-min+1)+min);
 }
 
-
-
 client.on('ready', () => {
-  console.log('準備できた');
+  console.log('準備できています');
 });
-
-/*
-let word = 'ともだち';
-console.log(word.substring(word.length-1));
-
-let res = undefined;
-request('http://jisho.org/api/v1/search/words?keyword=' + word + '*', function (error, response, body) {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  //console.log('body:', body); // Print the HTML for the Google homepage.
-  res = JSON.parse(body);
-  //console.log(res.data);
-  var data = (res.data).filter(res => res.is_common == true);
-  console.log(data.length);
-
-  var randomIndex = Math.floor(Math.random() * data.length);
-
-  var content = data[randomIndex];
-  console.log(content);
-  console.log(content.japanese[0].word);
-  // make a list from the data
-  var senses = JSON.stringify(content.senses[0].english_definitions).replace(/\"/g, '').replace(/,/g, '\n');
-  // remove brackets
-  senses = senses.substring(1, senses.length-1);
-  // markdown format
-  senses = senses.replace(/^/gm, '- ');
-  console.log(senses);
-});
-*/
 
 client.on('message', message => {
   // Here we separate our "command" name, and our "arguments" for the command.
@@ -62,11 +31,17 @@ client.on('message', message => {
   }
 
   if (command == 's' && args[0] != 'だれですか') {
-    let syllable = args[0].substring(args[0].length-1);
-    console.log(syllable);
-    let query = encodeURI(syllable);
+    // check if the argument is written in hiragana/katakana
+    var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/
+    var syllable = args[0].substring(args[0].length-1);
+    if (! regex.test(syllable)) {
+      message.channel.send('かなを書いてください');
+      return;
+    }
+    //console.log(syllable);
+    var query = encodeURI(syllable);
 
-    let res;
+    var res;
     request('http://jisho.org/api/v1/search/words?keyword=' + query + '*', function (error, response, body) {
       console.log('error:', error); // Print the error if one occurred
       console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -82,7 +57,7 @@ client.on('message', message => {
         var randomIndex = Math.floor(Math.random() * data.length);
         var content = data[randomIndex];
         // reroll if the reading is outdated (one-syllable words)
-        while (! content.japanese[0].reading.startsWith(syllable)){
+        while (! content.japanese[0].reading.startsWith(syllable) || content.japanese[0].reading.endsWith('ん')){
           randomIndex = Math.floor(Math.random() * data.length);
           var content = data[randomIndex];
         }
@@ -96,7 +71,7 @@ client.on('message', message => {
         // remove brackets
         senses = senses.substring(1, senses.length-1);
         // markdown format
-        senses = senses.replace(/^/gm, '- ');
+        senses = senses.replace(/^/gm, '・');
         console.log(senses);
 
         message.channel.send({embed: {
@@ -142,8 +117,8 @@ client.on('message', message => {
         //console.log(res.data);
         var data = (res.data).filter(res => res.is_common == true);
 
-        var randomIndex = Math.floor(Math.random() * data.length);
-        var content = data[randomIndex];
+        //var randomIndex = Math.floor(Math.random() * data.length);
+        var content = data[0];
         console.log(content);
         //console.log(content.japanese);
 
@@ -153,7 +128,7 @@ client.on('message', message => {
         // remove brackets
         senses = senses.substring(1, senses.length-1);
         // markdown format
-        senses = senses.replace(/^/gm, '- ');
+        senses = senses.replace(/^/gm, '・');
         console.log(senses);
 
         message.channel.send({embed: {
