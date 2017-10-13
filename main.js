@@ -39,17 +39,37 @@ client.on('message', message => {
   */
   if (command == 's' && args[0] != 'だれですか') {
     // check if the argument is written in hiragana/katakana
-    var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/
-    var syllable = args[0].substring(args[0].length-1);
+    var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/;
+
+    // if the word is longer than one syllable, filter the last one
+    var syllable;
+    if (args[0].length > 1){
+      syllable = args[0].substring(args[0].length-1);
+    }
+    else {
+      syllable = args[0];
+    }
     if (! regex.test(syllable)) {
       message.channel.send('かなを書いてください');
       return;
     }
 
+    // compound syllable, filters the last two characters of the word
+    var regex_halfwidth = /ゃ|ょ|ゅ/;
+    if (regex_halfwidth.test(syllable)) {
+      syllable = args[0].substring(args[0].length-2);
+    }
+    //console.log(syllable);
+
+    // if the last syllable is one of these: き,ぎ,し,じ,ち,ぢ,ひ,び,ぴ,み,に,り
+    //syllable = (/し[^ゃょゅ]+/).toString();
+
     // encodes special characters (any japanese character) for the query
     var query = encodeURI(syllable);
+    // random query page, 20 results per page
+    var randomPage = randomIntFromInterval(1, 4);
 
-    request('http://jisho.org/api/v1/search/words?keyword=' + query + '*', function (error, response, body) {
+    request('http://jisho.org/api/v1/search/words?keyword=' + query + '*&page=' + randomPage, function (error, response, body) {
       console.log('error:', error); // Print the error if one occurred
       console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
 
@@ -61,6 +81,7 @@ client.on('message', message => {
 
         // only deals with common words
         var data = (res.data).filter(res => res.is_common == true);
+        console.log ("Data: " + data.length + " items");
 
         // pick a random word in the array of results
         var randomIndex = Math.floor(Math.random() * data.length);
