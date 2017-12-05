@@ -38,16 +38,46 @@ client.on('message', message => {
   e.g. かぞく　--> くに
   */
   if (command == 's' && args[0] != 'だれですか') {
+    var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/; // hiragana/katakana regex
+    var regex_halfwidth = /ゃ|ょ|ゅ/; // half-width hiragana
+
+    // if the word is longer than one syllable, filter the last one
+    var syllable;
+    if (args[0].length > 1){
+      syllable = args[0].substring(args[0].length-1);
+
+      // cannot search half-width kana alone, filter the last two syllables instead
+      if (regex_halfwidth.test(syllable)) {
+        syllable = args[0].substring(args[0].length-2);
+      }
+    }
+    else {
+      syllable = args[0];
+
+      // cannot search half-width kana alone
+      if (regex_halfwidth.test(syllable)) {
+        message.channel.send('わかりません！');
+        return;
+      }
+    }
+
     // check if the argument is written in hiragana/katakana
-    var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/
-    var syllable = args[0].substring(args[0].length-1);
     if (! regex.test(syllable)) {
       message.channel.send('かなを書いてください');
       return;
     }
 
+    // compound syllable, filters the last two characters of the word
+
+    //console.log(syllable);
+
+    // if the last syllable is one of these: き,ぎ,し,じ,ち,ぢ,ひ,び,ぴ,み,に,り
+    //syllable = (/し[^ゃょゅ]+/).toString();
+
     // encodes special characters (any japanese character) for the query
     var query = encodeURI(syllable);
+    // random query page, 20 results per page
+    // var randomPage = randomIntFromInterval(1, 4);
 
     request('http://jisho.org/api/v1/search/words?keyword=' + query + '*', function (error, response, body) {
       console.log('error:', error); // Print the error if one occurred
@@ -61,8 +91,11 @@ client.on('message', message => {
 
         // only deals with common words
         var data = (res.data).filter(res => res.is_common == true);
+        console.log ("Data: " + data.length + " items");
 
+        // select data[0] if there is only one result
         // pick a random word in the array of results
+        // if there is more than one word, randomize the index
         var randomIndex = Math.floor(Math.random() * data.length);
         var content = data[randomIndex];
 
@@ -119,9 +152,9 @@ client.on('message', message => {
   */
   if (command == 'def') {
     // encodes special characters (any japanese character) for the query
-    var query = encodeURI(syllable);
+    var query = encodeURI(args[0]);
 
-    request('http://jisho.org/api/v1/search/words?keyword=' + query + '*', function (error, response, body) {
+    request('http://jisho.org/api/v1/search/words?keyword=' + query, function (error, response, body) {
       console.log('error:', error); // Print the error if one occurred
       console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
 
@@ -131,11 +164,14 @@ client.on('message', message => {
       // if there is at least one result
       if (res.data.length > 0) {
 
+<<<<<<< HEAD
         // only deals with common words
         //var data = (res.data).filter(res => res.is_common == true);
 
+=======
+>>>>>>> 1e7ac7c1f0f02faefbbce1188da6caa2e8709897
         // takes the first result
-        var content = data[0];
+        var content = res.data[0];
 
         // formats the english definitions for the embed message
         // makes a list from the data
