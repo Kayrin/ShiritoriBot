@@ -164,12 +164,9 @@ client.on('message', message => {
       // if there is at least one result
       if (res.data.length > 0) {
 
-<<<<<<< HEAD
         // only deals with common words
         //var data = (res.data).filter(res => res.is_common == true);
 
-=======
->>>>>>> 1e7ac7c1f0f02faefbbce1188da6caa2e8709897
         // takes the first result
         var content = res.data[0];
 
