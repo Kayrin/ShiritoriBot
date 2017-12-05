@@ -132,7 +132,7 @@ client.on('message', message => {
       if (res.data.length > 0) {
 
         // only deals with common words
-        var data = (res.data).filter(res => res.is_common == true);
+        //var data = (res.data).filter(res => res.is_common == true);
 
         // takes the first result
         var content = data[0];
