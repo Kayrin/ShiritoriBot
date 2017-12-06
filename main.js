@@ -107,10 +107,15 @@ client.on('message', message => {
 
         // formats the english definitions for the embed message
         // makes a list from the data
-        var senses = JSON.stringify(content.senses[0].english_definitions).replace(/\"/g, '').replace(/,/g, '\n');
-        // removes brackets
-        senses = senses.substring(1, senses.length-1);
+        var definitions = [];
+        for (var i = 0; i < content.senses.length; i++){
+          definitions.push(content.senses[i].english_definitions);
+        }
+        var senses = definitions.join("\n");
+
         // markdown format
+        // space after commas
+        senses = senses.replace(/,/gm, ', ');
         // adds a bullet at the beginning of each line
         senses = senses.replace(/^/gm, '・');
 
@@ -169,20 +174,24 @@ client.on('message', message => {
 
         // formats the english definitions for the embed message
         // makes a list from the data
-        var senses = JSON.stringify(content.senses[0].english_definitions).replace(/\"/g, '').replace(/,/g, '\n');
-        // removes brackets
-        senses = senses.substring(1, senses.length-1);
+        var definitions = [];
+        for (var i = 0; i < content.senses.length; i++){
+          definitions.push(content.senses[i].english_definitions);
+        }
+        var senses = definitions.join("\n");
+
         // markdown format
+        // space after commas
+        senses = senses.replace(/,/gm, ', ');
         // adds a bullet at the beginning of each line
         senses = senses.replace(/^/gm, '・');
 
         // message with the result to send
         message.channel.send({embed: {
-          color: 3447003,
-          author: {
-            name: client.user.username,
-            icon_url: client.user.avatarURL
-          },
+          title: "Jisho.org results for `" + args[0] + "`",
+          color: 0xbf2f15,
+          url: "http://jisho.org/search/" + query,
+          timestamp: new Date(Date.now()),
           fields: [{
             // contains the word in kanji (or kana if there is no kanji)
             name: 'Word',
