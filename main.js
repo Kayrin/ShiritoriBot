@@ -28,7 +28,7 @@ client.on('message', message => {
   }
 
   // ask who the bot is
-  if (command == 's' && args[0] == 'だれですか') {
+  if (message.content === 'だれですか') {
     message.reply('なのです');
   }
 
@@ -37,7 +37,7 @@ client.on('message', message => {
   that starts with that syllable.
   e.g. かぞく　--> くに
   */
-  if (command == 's' && args[0] != 'だれですか') {
+  if (command == 's') {
     var regex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]/; // hiragana/katakana regex
     var regex_halfwidth = /ゃ|ょ|ゅ/; // half-width hiragana
 
@@ -120,16 +120,16 @@ client.on('message', message => {
         senses = senses.replace(/^/gm, '・');
 
         // message with the result to send
+        var word_defined = (content.japanese[0].word != undefined) ? content.japanese[0].word : content.japanese[0].reading;
         message.channel.send({embed: {
+          title: "Jisho.org results for " + word_defined,
           color: 3447003,
-          author: {
-            name: client.user.username,
-            icon_url: client.user.avatarURL
-          },
+          url: "http://jisho.org/search/" + word_defined,
+          timestamp: new Date(Date.now()),
           fields: [{
             // contains the word in kanji (or kana if there is no kanji)
             name: 'Word',
-            value: content.japanese[0].word
+            value: word_defined
           },
           {
             // contains the reading in kana
@@ -188,7 +188,7 @@ client.on('message', message => {
 
         // message with the result to send
         message.channel.send({embed: {
-          title: "Jisho.org results for `" + args[0] + "`",
+          title: "Jisho.org results for " + args[0],
           color: 0xbf2f15,
           url: "http://jisho.org/search/" + query,
           timestamp: new Date(Date.now()),
